@@ -1,0 +1,41 @@
+// Optional hooks — copy into settings.json to enable. Left disabled to keep
+// the feedback loop fast for a 2-hour challenge.
+{
+  "hooks": {
+    // Full quality gate at the end of every Claude turn — nothing "done" ever sits red.
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm lint && pnpm typecheck && pnpm test",
+          },
+        ],
+      },
+    ],
+    // Guard: applied Prisma migrations are immutable — block edits, force a new migration instead.
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -e '.tool_input.file_path | test(\"prisma/migrations/\")' >/dev/null 2>&1 && { echo 'Blocked: never edit applied migrations — create a new one (pnpm exec prisma migrate dev)' >&2; exit 2; } || exit 0",
+          },
+        ],
+      },
+    ],
+    // Reminder: surface the clean-code self-review checklist after every TypeScript edit.
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | grep -qE '\\.tsx?$' && echo 'clean-code check: truthful names, guard clauses, <=30-line functions, typed errors, no leftover scaffolding' || true",
+          },
+        ],
+      },
+    ],
+  },
+}
