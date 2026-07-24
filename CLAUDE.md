@@ -37,6 +37,8 @@ Scope to one package with `pnpm --filter <package> <script>`.
 
 - **clean-code** — writing or refactoring ANY TypeScript: naming, function shape, control flow,
   module limits, the pre-commit self-review.
+- **ddd-solid** — touching the domain, adding a use case, or reviewing architecture: the
+  tactical-pattern map of this repo and the calibration rule (abstractions must earn their keep).
 - **react-best-practices** — anything in `applications/web`: routes, loaders/actions, component
   and hook rules for React Router v7 + React 19.
 - **unit-tests** — writing or running tests: Vitest conventions, in-memory port fakes,

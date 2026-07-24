@@ -5,10 +5,20 @@ on:
     branches: ["**"]
   pull_request:
 
+# Least privilege: nothing in this pipeline writes to the repo.
+permissions:
+  contents: read
+
+# Superseded pushes cancel their in-flight runs instead of queueing.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quality:
     name: Lint · Typecheck · Test · Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -43,6 +53,7 @@ jobs:
   e2e:
     name: E2E (Playwright)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16-alpine
@@ -88,6 +99,7 @@ jobs:
   docker:
     name: Docker image builds
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
