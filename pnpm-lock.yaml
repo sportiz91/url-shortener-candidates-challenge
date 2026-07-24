@@ -47,6 +47,9 @@ importers:
       '@url-shortener/engine':
         specifier: workspace:*
         version: link:../../libs/engine
+      '@url-shortener/infrastructure':
+        specifier: workspace:*
+        version: link:../../libs/infrastructure
       isbot:
         specifier: ^5.1.31
         version: 5.1.32
