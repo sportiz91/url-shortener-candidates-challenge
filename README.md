@@ -5,13 +5,57 @@ Shortens URLs, redirects short codes to their targets, and tracks click statisti
 ## Architecture
 
 ```
-url-shortener/
-├── applications/web/      # React Router v7 (SSR) — UI + HTTP boundary (loaders/actions)
-├── libs/engine/           # Pure domain + application layer (no framework, no IO)
-└── libs/infrastructure/   # Prisma/PostgreSQL adapter + composition root
+                     ┌──────────────────────────────────────────────┐
+                     │            applications/web                  │
+                     │      React Router v7 · SSR · React 19        │
+                     │                                              │
+ Browser ──POST───▶  │  _index.tsx  (action: shorten + rate limit)  │
+ Browser ──GET────▶  │  s.$code.tsx (loader: redirect 302 + click)  │
+ Browser ──GET────▶  │  urls.tsx    (loader: stats table)           │
+                     │       │                                      │
+                     │  .server/container.ts    ← composition root  │
+                     │  .server/rate-limiter.ts ← 429 + Retry-After │
+                     └───────┼──────────────────────────────────────┘
+                             │  routes only see USE CASES (interfaces)
+                     ┌───────▼──────────────────────────┐
+                     │          libs/engine             │  pure TypeScript,
+                     │  VOs: OriginalUrl · ShortCode    │  no framework,
+                     │  Aggregate: ShortenedUrl         │  no IO
+                     │  Use cases: ShortenUrl           │
+                     │    ResolveShortCode · ListUrls   │
+                     │  Ports: UrlRepository            │
+                     │    CodeGenerator · Clock         │
+                     └───────▲──────────────────────────┘
+                             │  implements the ports (arrow INVERTED:
+                             │  infrastructure depends on the domain)
+                     ┌───────┴──────────────────────────┐
+                     │      libs/infrastructure         │
+                     │  PrismaUrlRepository (P2002 →    │
+                     │    typed SaveConflictError)      │
+                     │  createContainer() ← the ONLY    │
+                     │    place Prisma is instantiated  │
+                     └───────┬──────────────────────────┘
+                             │ SQL
+                        ┌────▼───────┐
+                        │ PostgreSQL │  docker compose · pgdata volume
+                        └────────────┘  migrations apply on boot
 ```
 
 Dependencies point inward only: `web → infrastructure → engine`.
+
+Quality runs as three rings around the code — while it's written, at commit, and on push:
+
+```
+  while coding (AI-assisted)        at commit                    on push
+ ┌───────────────────────────┐   ┌──────────────────────┐   ┌───────────────────────┐
+ │ Claude Code               │   │ husky pre-commit     │   │ GitHub Actions CI     │
+ │ · CLAUDE.md house rules   │   │  └─ lint-staged:     │   │  quality: lint,       │
+ │ · .claude/skills          │──▶│     prettier --write │──▶│   format:check,       │
+ │ · PostToolUse hook:       │   │     eslint --fix     │   │   typecheck, test,    │
+ │   prettier + eslint --fix │   │     (staged files)   │   │   build               │
+ │   after every AI edit     │   │                      │   │  docker: image build  │
+ └───────────────────────────┘   └──────────────────────┘   └───────────────────────┘
+```
 
 - **`libs/engine`** — value objects (`OriginalUrl`, `ShortCode`), the `ShortenedUrl`
   aggregate, typed domain errors, and use cases (`ShortenUrl`, `ResolveShortCode`,
