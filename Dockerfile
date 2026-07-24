@@ -3,7 +3,7 @@ RUN corepack enable && corepack prepare pnpm@10.20.0 --activate && apk add --no-
 WORKDIR /app
 
 FROM base AS dependencies
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc ./
 COPY libs/engine/package.json ./libs/engine/
 COPY libs/infrastructure/package.json ./libs/infrastructure/
 COPY applications/web/package.json ./applications/web/
