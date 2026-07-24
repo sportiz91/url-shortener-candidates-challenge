@@ -1,5 +1,5 @@
 {
-  "name": "@url-shortener/engine",
+  "name": "@url-shortener/infrastructure",
   "version": "0.0.1",
   "type": "module",
   "main": "src/index.ts",
@@ -7,17 +7,21 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist tsconfig.tsbuildinfo .turbo",
-    "dev": "tsc --watch",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy"
   },
   "exports": {
     ".": "./src/index.ts"
   },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "@url-shortener/engine": "workspace:*"
+  },
   "devDependencies": {
     "@types/node": "^22.19.7",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.10"
+    "prisma": "^6.19.3",
+    "typescript": "^5.9.3"
   }
 }
