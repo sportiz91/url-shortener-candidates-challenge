@@ -41,6 +41,8 @@ Scope to one package with `pnpm --filter <package> <script>`.
   and hook rules for React Router v7 + React 19.
 - **unit-tests** — writing or running tests: Vitest conventions, in-memory port fakes,
   determinism via injected clock/generator.
+- **e2e-tests** — Playwright suite in `applications/web/e2e`: critical paths only,
+  accessible selectors, wait-on-state, the isbot/UA gotcha for click assertions.
 - **security-review** — touching URL validation, the redirect route, or user input; run its
   audit before calling a feature done.
 - **parallel-worktree** — multi-session work on larger efforts: isolated worktrees per work

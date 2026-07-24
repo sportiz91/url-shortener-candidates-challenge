@@ -40,6 +40,51 @@ jobs:
       - name: Build
         run: pnpm build
 
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: shortener
+          POSTGRES_PASSWORD: shortener
+          POSTGRES_DB: shortener
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U shortener -d shortener"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://shortener:shortener@localhost:55432/shortener
+      PUBLIC_URL: http://localhost:5173
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Apply migrations
+        run: pnpm db:deploy
+
+      - name: Install Playwright browsers
+        run: pnpm --filter web exec playwright install --with-deps chromium
+
+      - name: Run e2e suite
+        run: pnpm --filter web e2e
+
   docker:
     name: Docker image builds
     runs-on: ubuntu-latest

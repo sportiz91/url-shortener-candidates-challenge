@@ -36,17 +36,19 @@ In priority order:
 
 5. **Quality gates.** ESLint (flat) + Prettier + husky/lint-staged pre-commit, 28 Vitest
    tests covering the domain and every use-case branch (collision retry, retry exhaustion,
-   idempotency race, bot exclusion), GitHub Actions CI (lint/format/typecheck/test/build +
-   Docker image build). The tests run against an in-memory repository fake — that fake
-   existing at all is the proof the dependency inversion is real.
+   idempotency race, bot exclusion), plus a 4-scenario Playwright e2e suite for the
+   critical paths (shorten, 302 redirect, invalid-input feedback, click stats) running
+   against a real server + Postgres. GitHub Actions CI runs it all: lint/format/typecheck/
+   unit tests/build, the e2e suite against a Postgres service, and the Docker image build.
+   The unit tests run against an in-memory repository fake — that fake existing at all is
+   the proof the dependency inversion is real.
 
 Docker was verified end-to-end: `docker-compose up --build` boots Postgres, applies
 migrations and serves on `:3000` with zero manual steps.
 
 ## What I Would Do With More Time
 
-- Integration tests for the Prisma adapter against a real Postgres (testcontainers), and
-  one Playwright happy-path e2e (shorten → redirect → stats).
+- Integration tests for the Prisma adapter against a real Postgres (testcontainers).
 - If this ran on more than one instance: Redis-backed rate limiter, and a cache-aside
   decorator over the repository for redirects — caching only the immutable target URL,
   never the click count.

@@ -6,6 +6,7 @@
     "build": "react-router build",
     "clean": "rm -rf build .react-router .turbo",
     "dev": "react-router dev",
+    "e2e": "playwright test",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc"
   },

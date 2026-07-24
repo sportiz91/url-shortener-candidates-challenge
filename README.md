@@ -84,7 +84,8 @@ Quality runs as three rings around the code — while it's written, at commit, a
 | [Vitest](https://vitest.dev/)                 | Unit tests for the domain and application layer                                                   |
 
 Quality gates: ESLint (flat config) + Prettier + husky/lint-staged on every commit,
-and GitHub Actions CI (lint, format check, typecheck, tests, build, Docker image).
+and GitHub Actions CI (lint, format check, typecheck, unit tests, build, Playwright
+e2e against a Postgres service, Docker image).
 
 ## Docker Setup
 
@@ -115,11 +116,12 @@ Open `http://localhost:5173`
 ### Useful scripts
 
 ```bash
-pnpm test          # unit tests (Vitest)
-pnpm lint          # ESLint
-pnpm typecheck     # tsc + react-router typegen
-pnpm format        # Prettier
-pnpm db:migrate    # create/apply a migration in dev
+pnpm test               # unit tests (Vitest)
+pnpm --filter web e2e   # Playwright e2e (needs the db service up)
+pnpm lint               # ESLint
+pnpm typecheck          # tsc + react-router typegen
+pnpm format             # Prettier
+pnpm db:migrate         # create/apply a migration in dev
 ```
 
 ## Security notes
